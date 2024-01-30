@@ -1,5 +1,6 @@
 import React from 'react';
 import ChatMessages from './components/ChatMessages';
+import './App.css';
 
 const App: React.FC = () => {
   return (

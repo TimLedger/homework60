@@ -35,7 +35,10 @@ const ChatMessages: React.FC = () => {
     }
   };
 
-  
+  const formatDateTime = (dateTime: string) => {
+    const date = new Date(dateTime);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -63,39 +66,37 @@ const ChatMessages: React.FC = () => {
     <div>
       <form onSubmit={handleSubmit}>
       <TextField
-        label="Your message"
+        className='input-message'
+        label="Ваше сообщение"
         variant="outlined"
         value={messageText}
         onChange={(e) => setMessageText(e.target.value)}
         required
       />
       <TextField
-        label="Your name"
+        label="Ваше имя"
         variant="outlined"
         value={authorName}
         onChange={(e) => setAuthorName(e.target.value)}
         required
       />
       <Button type="submit" variant="contained" color="primary" endIcon={<SendIcon />}>
-        Send
+        Отправить
       </Button>
-      {/* <Button variant="contained" type="submit" endIcon={<SendIcon />}>
-         Send
-      </Button> */}
       </form>
-      <List>
+      <List className='list'>
       {messages.map((message) => (
-          <ListItem key={message._id}>
+          <ListItem key={message._id} className='message'>
             <ListItemAvatar>
               <Avatar>{message.author[0]}</Avatar>
             </ListItemAvatar>
-            <ListItemText
+            <ListItemText 
               primary={message.author}
-              secondary={
+              secondary={ 
                 <>
-                  {message.message}
-                  <br />
-                  {message.datetime}
+                  <span className='message-text'>{message.message}</span>
+                  <br/>
+                  <span className="time">{formatDateTime(message.datetime)}</span>
                 </>
               }
             />
