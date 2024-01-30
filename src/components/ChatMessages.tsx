@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import { TextField, Button, List, ListItem, ListItemText, ListItemAvatar, Avatar } from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import axios from 'axios';
+
+interface Message {
+    _id: string;
+    message: string;
+    author: string;
+    datetime: string;
+}
 
 const ChatMessages: React.FC = () => {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [messageText, setMessageText] = useState('');
   const [authorName, setAuthorName] = useState('Tim Ledger');
 
@@ -15,16 +25,17 @@ const ChatMessages: React.FC = () => {
 
   const fetchMessages = async () => {
     try {
-      const response = await fetch('http://146.185.154.90:8000/messages');
-      if (!response.ok) {
+      const response = await axios.get<Message[]>('http://146.185.154.90:8000/messages');
+      if (!response.data) {
         throw new Error('Не удалось получить сообщения.');
       }
-      const data = await response.json();
-      setMessages(data.reverse());
+      setMessages(response.data.reverse());
     } catch (error) {
       console.error('Ошибка при получении сообщений:', error);
     }
   };
+
+  
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -34,12 +45,9 @@ const ChatMessages: React.FC = () => {
       data.set('message', messageText);
       data.set('author', authorName);
 
-      const response = await fetch(url, {
-        method: 'POST',
-        body: data
-      });
+      const response = await axios.post<Message>(url, data);
 
-      if (!response.ok) {
+      if (!response.data) {
         throw new Error('Не удалось отправить сообщение');
       }
 
@@ -53,32 +61,48 @@ const ChatMessages: React.FC = () => {
 
   return (
     <div>
-      <h2>Чат</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={messageText}
-          onChange={(e) => setMessageText(e.target.value)}
-          placeholder="Введите сообщение..."
-          required
-        />
-        <input
-          type="text"
-          value={authorName}
-          onChange={(e) => setAuthorName(e.target.value)}
-          placeholder="Ваше имя..."
-          required
-        />
-        <button type="submit">Отправить</button>
+      <TextField
+        label="Your message"
+        variant="outlined"
+        value={messageText}
+        onChange={(e) => setMessageText(e.target.value)}
+        required
+      />
+      <TextField
+        label="Your name"
+        variant="outlined"
+        value={authorName}
+        onChange={(e) => setAuthorName(e.target.value)}
+        required
+      />
+      <Button type="submit" variant="contained" color="primary" endIcon={<SendIcon />}>
+        Send
+      </Button>
+      {/* <Button variant="contained" type="submit" endIcon={<SendIcon />}>
+         Send
+      </Button> */}
       </form>
-      <ul>
-        {messages.map((message: any) => (
-          <li key={message._id}>
-            <strong>{message.author}:</strong> {message.message} ({message.datetime})
-          </li>
+      <List>
+      {messages.map((message) => (
+          <ListItem key={message._id}>
+            <ListItemAvatar>
+              <Avatar>{message.author[0]}</Avatar>
+            </ListItemAvatar>
+            <ListItemText
+              primary={message.author}
+              secondary={
+                <>
+                  {message.message}
+                  <br />
+                  {message.datetime}
+                </>
+              }
+            />
+          </ListItem>
         ))}
-      </ul>
-    </div>
+       </List>
+  </div>
   );
 };
 
